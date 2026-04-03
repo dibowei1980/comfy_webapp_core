@@ -1,0 +1,210 @@
+Metadata-Version: 2.4
+Name: comfyui-webapp-core
+Version: 0.1.0
+Summary: Core library for ComfyUI WebApp - shared components for master/worker distributed deployment
+Author-email: Your Name <your@email.com>
+License: Apache-2.0
+Keywords: comfyui,webapp,workflow,distributed
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: aiohttp>=3.8.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: isort>=5.12.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+
+# ComfyUI WebApp Core
+
+ComfyUI WebApp 核心库，用于 Master-Worker 分布式部署场景下的代码共享。
+
+## 功能特性
+
+- **数据模型**: WebApp、NodeField、TaskResult 等核心数据结构
+- **节点映射**: Workflow 与 API 格式之间的转换
+- **用户目录管理**: 多用户数据隔离支持
+- **抽象接口**: 依赖注入，支持不同环境实现
+
+## 安装
+
+### 从 Git 安装
+
+```bash
+pip install comfyui-webapp-core @ git+https://github.com/your-org/comfyui-webapp-core.git@v0.1.0
+```
+
+### 从源码安装
+
+```bash
+git clone https://github.com/your-org/comfyui-webapp-core.git
+cd comfyui-webapp-core
+pip install -e .
+```
+
+## 使用示例
+
+### 基础用法
+
+```python
+from webapp_core import (
+    WebApp, NodeField, TaskResult,
+    NodeMapper, node_mapper,
+    UserDirectoryManager, user_dir_manager,
+)
+
+# 从 workflow 创建 WebApp
+workflow = {...}  # workflow JSON
+webapp = node_mapper.create_webapp_from_workflow(workflow, "My App")
+
+# 提取可编辑字段
+fields = node_mapper.extract_editable_fields(workflow)
+
+# 转换为 API 格式
+api_format = node_mapper.workflow_to_api_format(workflow)
+```
+
+### 用户目录隔离
+
+```python
+from webapp_core import user_dir_manager
+
+# 获取用户特定目录
+input_dir = user_dir_manager.get_input_directory("user123")
+output_dir = user_dir_manager.get_output_directory("user123")
+
+# 使用上下文管理器
+with user_dir_manager.user_context("user123"):
+    # 在此上下文中，folder_paths 使用 user123 的目录
+    import folder_paths
+    input_dir = folder_paths.get_input_directory()
+```
+
+### 自定义节点注册表
+
+```python
+from webapp_core import NodeMapper, INodeRegistry
+
+class CustomNodeRegistry(INodeRegistry):
+    def get_node_class_mappings(self):
+        return {...}  # 自定义节点映射
+    
+    def get_node_display_names(self):
+        return {...}  # 自定义显示名称
+
+registry = CustomNodeRegistry()
+mapper = NodeMapper(node_registry=registry)
+```
+
+## Master-Worker 架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Master                                │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │ routes.py   │  │ scheduler   │  │ webapp_core         │  │
+│  │ (API接口)   │  │ (任务调度)  │  │ (models, mapper)    │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ 任务队列 / 消息
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                        Worker                                │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │ executor.py │  │ reporter.py │  │ webapp_core         │  │
+│  │ (任务执行)  │  │ (状态上报)  │  │ (models, mapper)    │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 模块说明
+
+### models.py
+
+数据模型定义：
+- `WebApp`: WebApp 应用定义
+- `NodeField`: 节点可编辑字段
+- `TaskResult`: 任务执行结果
+- `FieldType`: 字段类型枚举
+- `WebAppStatus`: WebApp 状态枚举
+
+### interfaces.py
+
+抽象接口定义：
+- `INodeRegistry`: 节点注册表接口
+- `IPathManager`: 路径管理接口
+- `ITaskQueue`: 任务队列接口
+- `IExecutionEngine`: 执行引擎接口
+- `IProgressReporter`: 进度上报接口
+- `IStorageBackend`: 存储后端接口
+
+### node_mapper.py
+
+节点映射功能：
+- `extract_editable_fields()`: 提取可编辑字段
+- `workflow_to_api_format()`: 转换为 API 格式
+- `apply_field_changes()`: 应用字段变更
+- `create_webapp_from_workflow()`: 从 workflow 创建 WebApp
+
+### user_directory.py
+
+用户目录管理：
+- `get_input_directory()`: 获取输入目录
+- `get_output_directory()`: 获取输出目录
+- `user_context()`: 用户目录上下文管理器
+- `cleanup_user_data()`: 清理用户数据
+
+## 版本更新
+
+### 更新流程
+
+1. 修改 `webapp_core` 代码
+2. 更新 `pyproject.toml` 中的版本号
+3. 推送到 Git 仓库
+4. Master/Worker 更新依赖版本
+
+### 版本号规则
+
+使用语义化版本 (SemVer):
+- MAJOR: 不兼容的 API 变更
+- MINOR: 向后兼容的功能新增
+- PATCH: 向后兼容的问题修复
+
+## 开发
+
+### 安装开发依赖
+
+```bash
+pip install -e ".[dev]"
+```
+
+### 运行测试
+
+```bash
+pytest
+```
+
+### 代码格式化
+
+```bash
+black webapp_core
+isort webapp_core
+```
+
+### 类型检查
+
+```bash
+mypy webapp_core
+```
+
+## 许可证
+
+Apache-2.0
