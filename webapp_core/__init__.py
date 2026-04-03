@@ -30,7 +30,7 @@ Installation:
     pip install comfyui-webapp-core
     
 Or from git:
-    pip install comfyui-webapp-core @ git+https://github.com/your-org/comfyui-webapp-core.git
+    pip install comfyui-webapp-core @ git+https://github.com/dibowei1980/comfyui-webapp-core.git
 """
 
 __version__ = "0.1.0"
