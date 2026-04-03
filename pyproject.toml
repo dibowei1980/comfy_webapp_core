@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "Apache-2.0"}
 authors = [
-    {name = "Your Name", email = "your@email.com"}
+    {name = "dibowei", email = "dibowei2069@gmail.com"}
 ]
 keywords = ["comfyui", "webapp", "workflow", "distributed"]
 classifiers = [
