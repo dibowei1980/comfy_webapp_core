@@ -34,7 +34,7 @@ Or from git:
 """
 
 __version__ = "0.1.0"
-__author__ = "Your Name"
+__author__ = "dibowei"
 __license__ = "Apache-2.0"
 
 from .models import (
