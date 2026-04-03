@@ -14,7 +14,7 @@ from typing import Optional, Callable, Dict
 from .interfaces import IPathManager
 
 
-class UserDirectoryManager(IPathManager):
+class BaseUserDirectoryManager(IPathManager):
     """
     Manages user-specific directories for data isolation.
     
@@ -321,4 +321,4 @@ class UserDirectoryManager(IPathManager):
         return total_size
 
 
-user_dir_manager = UserDirectoryManager()
+user_dir_manager = BaseUserDirectoryManager()

@@ -34,7 +34,7 @@ pip install -e .[](https://github.com/dibowei1980/comfy_webapp_core.git)
 from webapp_core import (
     WebApp, NodeField, TaskResult,
     NodeMapper, node_mapper,
-    UserDirectoryManager, user_dir_manager,
+    BaseUserDirectoryManager, user_dir_manager,
 )
 
 # 从 workflow 创建 WebApp

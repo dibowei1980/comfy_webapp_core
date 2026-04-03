@@ -14,7 +14,7 @@ Usage:
     from webapp_core import (
         WebApp, NodeField, TaskResult,
         NodeMapper, node_mapper,
-        UserDirectoryManager, user_dir_manager,
+        BaseUserDirectoryManager, user_dir_manager,
         INodeRegistry, IPathManager, ITaskQueue, IExecutionEngine
     )
     
@@ -61,7 +61,7 @@ from .node_mapper import (
 )
 
 from .user_directory import (
-    UserDirectoryManager,
+    BaseUserDirectoryManager,
     user_dir_manager,
 )
 
@@ -92,6 +92,6 @@ __all__ = [
     "node_mapper",
     
     # User Directory
-    "UserDirectoryManager",
+    "BaseUserDirectoryManager",
     "user_dir_manager",
 ]
