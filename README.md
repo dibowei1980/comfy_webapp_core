@@ -21,7 +21,7 @@ pip install comfyui-webapp-core @ git+https://github.com/dibowei1980/comfyui-web
 ### 从源码安装
 
 ```bash
-git clone https://github.com/your-org/comfyui-webapp-core.git
+git clone https://github.com/dibowei1980/comfyui-webapp-core.git
 cd comfyui-webapp-core
 pip install -e .
 ```
