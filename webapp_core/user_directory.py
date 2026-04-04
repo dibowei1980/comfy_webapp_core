@@ -1,8 +1,7 @@
 """
-User directory management for multi-user data isolation.
+用户目录管理模块，用于多用户数据隔离。
 
-This module provides functionality for managing user-specific directories,
-ensuring that each user's data is isolated from others.
+本模块提供管理用户专属目录的功能，确保每个用户的数据相互隔离。
 """
 
 import os
@@ -14,26 +13,27 @@ from typing import Optional, Callable, Dict
 from .interfaces import IPathManager
 
 
-class BaseUserDirectoryManager(IPathManager):
+class UserDirectoryManager(IPathManager):
     """
-    Manages user-specific directories for data isolation.
+    用户目录管理器，用于数据隔离。
     
-    This class implements IPathManager interface and provides:
-    - User-specific input/output/temp directories
-    - Thread-safe directory switching
-    - Context manager for user directory operations
+    实现IPathManager接口，提供：
+    - 用户专属的输入/输出/临时目录
+    - 线程安全的目录切换
+    - 用户目录操作的上下文管理器
     """
     
-    _instance = None
+    _instances: Dict[type, 'UserDirectoryManager'] = {}
     _lock = threading.Lock()
     
     def __new__(cls, *args, **kwargs):
-        """Singleton pattern for global directory manager."""
-        if cls._instance is None:
+        """单例模式，支持按类类型创建独立实例，便于继承。"""
+        if cls not in cls._instances:
             with cls._lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-        return cls._instance
+                if cls not in cls._instances:
+                    instance = super().__new__(cls)
+                    cls._instances[cls] = instance
+        return cls._instances[cls]
     
     def __init__(self, base_user_dir: Optional[str] = None,
                  default_input_dir: Optional[str] = None,
@@ -41,14 +41,14 @@ class BaseUserDirectoryManager(IPathManager):
                  default_temp_dir: Optional[str] = None,
                  path_provider: Optional[Callable] = None):
         """
-        Initialize the user directory manager.
+        初始化用户目录管理器。
         
-        Args:
-            base_user_dir: Base directory for user data (e.g., /app/user)
-            default_input_dir: Default input directory (fallback)
-            default_output_dir: Default output directory (fallback)
-            default_temp_dir: Default temp directory (fallback)
-            path_provider: Optional callable that provides folder_paths module
+        参数:
+            base_user_dir: 用户数据的基础目录（如 /app/user）
+            default_input_dir: 默认输入目录（回退用）
+            default_output_dir: 默认输出目录（回退用）
+            default_temp_dir: 默认临时目录（回退用）
+            path_provider: 可选的可调用对象，用于提供folder_paths模块
         """
         if hasattr(self, '_initialized') and self._initialized:
             return
@@ -64,7 +64,7 @@ class BaseUserDirectoryManager(IPathManager):
         self._init_directories()
     
     def _init_directories(self):
-        """Initialize default directories from ComfyUI or provided values."""
+        """从ComfyUI或提供的值初始化默认目录。"""
         if self._base_user_dir is None:
             try:
                 if self._path_provider:
@@ -107,13 +107,11 @@ class BaseUserDirectoryManager(IPathManager):
     
     def get_user_directory(self, user_id: str = "default") -> str:
         """
-        Get the base user directory path.
-        
-        Args:
-            user_id: The user identifier
-            
-        Returns:
-            Absolute path to the user's base directory
+        获取用户的基础目录路径。
+        参数:
+            user_id: 用户标识符
+        返回:
+            用户基础目录的绝对路径
         """
         if user_id == "default":
             return self._base_user_dir
@@ -121,13 +119,13 @@ class BaseUserDirectoryManager(IPathManager):
     
     def get_input_directory(self, user_id: str = "default") -> str:
         """
-        Get the input directory path for a user.
+        获取用户的输入目录路径。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Returns:
-            Absolute path to the user's input directory
+        返回:
+            用户输入目录的绝对路径
         """
         if user_id == "default":
             return self._default_input_dir
@@ -135,13 +133,13 @@ class BaseUserDirectoryManager(IPathManager):
     
     def get_output_directory(self, user_id: str = "default") -> str:
         """
-        Get the output directory path for a user.
+        获取用户的输出目录路径。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Returns:
-            Absolute path to the user's output directory
+        返回:
+            用户输出目录的绝对路径
         """
         if user_id == "default":
             return self._default_output_dir
@@ -149,13 +147,13 @@ class BaseUserDirectoryManager(IPathManager):
     
     def get_temp_directory(self, user_id: str = "default") -> str:
         """
-        Get the temp directory path for a user.
+        获取用户的临时目录路径。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Returns:
-            Absolute path to the user's temp directory
+        返回:
+            用户临时目录的绝对路径
         """
         if user_id == "default":
             return self._default_temp_dir
@@ -163,34 +161,34 @@ class BaseUserDirectoryManager(IPathManager):
     
     def get_webapp_directory(self, user_id: str = "default") -> str:
         """
-        Get the webapp data directory for a user.
+        获取用户的WebApp数据目录。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Returns:
-            Absolute path to the user's webapp directory
+        返回:
+            用户WebApp目录的绝对路径
         """
         return os.path.join(self.get_user_directory(user_id), "webapp")
     
     def get_task_directory(self, user_id: str = "default") -> str:
         """
-        Get the task data directory for a user.
+        获取用户的任务数据目录。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Returns:
-            Absolute path to the user's task directory
+        返回:
+            用户任务目录的绝对路径
         """
         return os.path.join(self.get_user_directory(user_id), "tasks")
     
     def ensure_user_directories(self, user_id: str = "default") -> None:
         """
-        Ensure all user directories exist.
+        确保所有用户目录都存在。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
         """
         dirs = [
             self.get_user_directory(user_id),
@@ -207,20 +205,20 @@ class BaseUserDirectoryManager(IPathManager):
     @contextmanager
     def user_context(self, user_id: str):
         """
-        Context manager for user-specific directory operations.
+        用户专属目录操作的上下文管理器。
         
-        This temporarily switches the global folder_paths to user-specific
-        directories, and restores them when exiting the context.
+        临时将全局folder_paths切换到用户专属目录，
+        退出上下文时恢复原设置。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Yields:
-            self for chaining operations
+        生成:
+            self，用于链式操作
             
-        Example:
+        示例:
             with user_dir_manager.user_context("user123"):
-                # Operations here use user123's directories
+                # 此处的操作使用user123的目录
                 input_dir = folder_paths.get_input_directory()
         """
         try:
@@ -248,21 +246,21 @@ class BaseUserDirectoryManager(IPathManager):
                     folder_paths.set_temp_directory(original_temp)
                     
         except ImportError:
-            logging.warning("folder_paths not available, context switching skipped")
+            logging.warning("folder_paths不可用，跳过上下文切换")
             yield self
     
     def cleanup_user_data(self, user_id: str) -> bool:
         """
-        Clean up all data for a user.
+        清理用户的所有数据。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Returns:
-            True if cleanup successful
+        返回:
+            清理成功返回True
         """
         if user_id == "default":
-            logging.warning("Cannot cleanup default user data")
+            logging.warning("无法清理默认用户数据")
             return False
         
         user_dir = self.get_user_directory(user_id)
@@ -272,19 +270,19 @@ class BaseUserDirectoryManager(IPathManager):
                 shutil.rmtree(user_dir)
                 return True
             except Exception as e:
-                logging.error(f"Error cleaning up user data: {e}")
+                logging.error(f"清理用户数据时出错: {e}")
                 return False
         return True
     
     def get_user_storage_usage(self, user_id: str = "default") -> Dict[str, int]:
         """
-        Get storage usage for a user.
+        获取用户的存储使用情况。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Returns:
-            Dict with storage usage for each directory
+        返回:
+            各目录存储使用情况的字典
         """
         usage = {}
         
@@ -302,7 +300,7 @@ class BaseUserDirectoryManager(IPathManager):
         return usage
     
     def _calculate_dir_size(self, dir_path: str) -> int:
-        """Calculate total size of a directory in bytes."""
+        """计算目录的总大小（字节）。"""
         if not os.path.exists(dir_path):
             return 0
         
@@ -321,4 +319,4 @@ class BaseUserDirectoryManager(IPathManager):
         return total_size
 
 
-user_dir_manager = BaseUserDirectoryManager()
+user_dir_manager = UserDirectoryManager()

@@ -1,9 +1,8 @@
 """
-Abstract interfaces for ComfyUI WebApp Core.
+ComfyUI WebApp 核心抽象接口。
 
-These interfaces allow the webapp-core library to be used in different
-environments (standalone, master-worker distributed) by providing
-abstraction layers for ComfyUI-specific dependencies.
+这些接口允许webapp-core库在不同环境（独立模式、主从分布式）
+中使用，通过为ComfyUI特定依赖提供抽象层。
 """
 
 from abc import ABC, abstractmethod
@@ -13,54 +12,54 @@ from contextlib import contextmanager
 
 class INodeRegistry(ABC):
     """
-    Abstract interface for node registry.
+    节点注册表抽象接口。
     
-    Provides access to ComfyUI node class mappings and metadata.
-    Implementation should wrap ComfyUI's nodes.NODE_CLASS_MAPPINGS.
+    提供对ComfyUI节点类映射和元数据的访问。
+    实现应该封装ComfyUI的nodes.NODE_CLASS_MAPPINGS。
     """
     
     @abstractmethod
     def get_node_class_mappings(self) -> Dict[str, type]:
         """
-        Get the mapping of node class names to node classes.
+        获取节点类名称到节点类的映射。
         
-        Returns:
-            Dict mapping class_type string to node class
+        返回:
+            类类型字符串到节点类的字典映射
         """
         pass
     
     @abstractmethod
     def get_node_display_names(self) -> Dict[str, str]:
         """
-        Get the mapping of node class names to display names.
+        获取节点类名称到显示名称的映射。
         
-        Returns:
-            Dict mapping class_type string to display name
+        返回:
+            类类型字符串到显示名称的字典映射
         """
         pass
     
     def get_node_class(self, class_name: str) -> Optional[type]:
         """
-        Get a specific node class by name.
+        根据名称获取特定节点类。
         
-        Args:
-            class_name: The node class type name
+        参数:
+            class_name: 节点类类型名称
             
-        Returns:
-            The node class or None if not found
+        返回:
+            节点类，如果未找到则返回None
         """
         mappings = self.get_node_class_mappings()
         return mappings.get(class_name)
     
     def get_node_info(self, class_name: str) -> Optional[Dict[str, Any]]:
         """
-        Get detailed information about a node class.
+        获取节点类的详细信息。
         
-        Args:
-            class_name: The node class type name
+        参数:
+            class_name: 节点类类型名称
             
-        Returns:
-            Dict with node information or None if not found
+        返回:
+            包含节点信息的字典，如果未找到则返回None
         """
         node_class = self.get_node_class(class_name)
         if not node_class:
@@ -97,83 +96,83 @@ class INodeRegistry(ABC):
 
 class IPathManager(ABC):
     """
-    Abstract interface for path management.
+    路径管理抽象接口。
     
-    Provides access to input/output/temp directories with user isolation support.
-    Implementation should wrap ComfyUI's folder_paths module.
+    提供对输入/输出/临时目录的访问，支持用户隔离。
+    实现应该封装ComfyUI的folder_paths模块。
     """
     
     @abstractmethod
     def get_input_directory(self, user_id: str = "default") -> str:
         """
-        Get the input directory path for a user.
+        获取用户的输入目录路径。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Returns:
-            Absolute path to the user's input directory
+        返回:
+            用户输入目录的绝对路径
         """
         pass
     
     @abstractmethod
     def get_output_directory(self, user_id: str = "default") -> str:
         """
-        Get the output directory path for a user.
+        获取用户的输出目录路径。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Returns:
-            Absolute path to the user's output directory
+        返回:
+            用户输出目录的绝对路径
         """
         pass
     
     @abstractmethod
     def get_temp_directory(self, user_id: str = "default") -> str:
         """
-        Get the temp directory path for a user.
+        获取用户的临时目录路径。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Returns:
-            Absolute path to the user's temp directory
+        返回:
+            用户临时目录的绝对路径
         """
         pass
     
     @abstractmethod
     def get_user_directory(self, user_id: str = "default") -> str:
         """
-        Get the base user directory path.
+        获取用户的基础目录路径。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Returns:
-            Absolute path to the user's base directory
+        返回:
+            用户基础目录的绝对路径
         """
         pass
     
     @contextmanager
     def user_context(self, user_id: str):
         """
-        Context manager for user-specific directory operations.
+        用户专属目录操作的上下文管理器。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
             
-        Yields:
-            self for chaining operations
+        生成:
+            self，用于链式操作
         """
         yield self
     
     def ensure_user_directories(self, user_id: str = "default") -> None:
         """
-        Ensure all user directories exist.
+        确保所有用户目录都存在。
         
-        Args:
-            user_id: The user identifier
+        参数:
+            user_id: 用户标识符
         """
         import os
         for dir_func in [self.get_input_directory, self.get_output_directory, 
@@ -184,84 +183,84 @@ class IPathManager(ABC):
 
 class ITaskQueue(ABC):
     """
-    Abstract interface for task queue management.
+    任务队列管理抽象接口。
     
-    Provides methods for submitting and managing tasks.
-    In distributed mode, this would interface with a message queue.
+    提供提交和管理任务的方法。
+    在分布式模式下，这将与消息队列对接。
     """
     
     @abstractmethod
     async def submit(self, task_id: str, prompt: Dict[str, Any], 
                      extra_data: Optional[Dict[str, Any]] = None) -> bool:
         """
-        Submit a task to the queue.
+        提交任务到队列。
         
-        Args:
-            task_id: Unique task identifier
-            prompt: The workflow prompt in API format
-            extra_data: Additional data for execution
+        参数:
+            task_id: 唯一任务标识符
+            prompt: API格式的工作流提示
+            extra_data: 执行所需的额外数据
             
-        Returns:
-            True if submission successful
+        返回:
+            提交成功返回True
         """
         pass
     
     @abstractmethod
     async def get_status(self, task_id: str) -> Optional[Dict[str, Any]]:
         """
-        Get the current status of a task.
+        获取任务的当前状态。
         
-        Args:
-            task_id: The task identifier
+        参数:
+            task_id: 任务标识符
             
-        Returns:
-            Task status dict or None if not found
+        返回:
+            任务状态字典，如果未找到则返回None
         """
         pass
     
     @abstractmethod
     async def cancel(self, task_id: str) -> bool:
         """
-        Cancel a pending or running task.
+        取消待执行或正在执行的任务。
         
-        Args:
-            task_id: The task identifier
+        参数:
+            task_id: 任务标识符
             
-        Returns:
-            True if cancellation successful
+        返回:
+            取消成功返回True
         """
         pass
     
     @abstractmethod
     async def get_queue_size(self) -> int:
         """
-        Get the current queue size.
+        获取当前队列大小。
         
-        Returns:
-            Number of pending tasks
+        返回:
+            待执行任务数量
         """
         pass
 
 
 class IExecutionEngine(ABC):
     """
-    Abstract interface for execution engine.
+    执行引擎抽象接口。
     
-    Provides methods for validating and executing prompts.
-    Implementation should wrap ComfyUI's execution module.
+    提供验证和执行提示的方法。
+    实现应该封装ComfyUI的执行模块。
     """
     
     @abstractmethod
     async def validate_prompt(self, prompt_id: str, prompt: Dict[str, Any]) -> Tuple[bool, Optional[Dict], Optional[List], Optional[Dict]]:
         """
-        Validate a prompt before execution.
+        在执行前验证提示。
         
-        Args:
-            prompt_id: Unique identifier for the prompt
-            prompt: The workflow prompt in API format
+        参数:
+            prompt_id: 提示的唯一标识符
+            prompt: API格式的工作流提示
             
-        Returns:
-            Tuple of (is_valid, error_info, outputs_to_execute, node_errors)
+        返回:
+            元组 (是否有效, 错误信息, 要执行的输出, 节点错误)
         """
         pass
     
@@ -269,54 +268,54 @@ class IExecutionEngine(ABC):
     async def execute(self, prompt: Dict[str, Any], 
                       extra_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
-        Execute a prompt.
+        执行提示。
         
-        Args:
-            prompt: The workflow prompt in API format
-            extra_data: Additional execution data
+        参数:
+            prompt: API格式的工作流提示
+            extra_data: 额外的执行数据
             
-        Returns:
-            Execution result dict
+        返回:
+            执行结果字典
         """
         pass
     
     @abstractmethod
     def interrupt(self) -> None:
         """
-        Interrupt current execution.
+        中断当前执行。
         """
         pass
 
 
 class IProgressReporter(ABC):
     """
-    Abstract interface for progress reporting.
+    进度报告抽象接口。
     
-    Used by workers to report progress back to master.
+    用于工作节点向主节点报告进度。
     """
     
     @abstractmethod
     async def report_progress(self, task_id: str, progress: float, 
                               current_node: str = "", message: str = "") -> None:
         """
-        Report task progress.
+        报告任务进度。
         
-        Args:
-            task_id: The task identifier
-            progress: Progress value (0.0 to 1.0)
-            current_node: Currently executing node
-            message: Optional status message
+        参数:
+            task_id: 任务标识符
+            progress: 进度值（0.0到1.0）
+            current_node: 当前正在执行的节点
+            message: 可选的状态消息
         """
         pass
     
     @abstractmethod
     async def report_completion(self, task_id: str, result: Dict[str, Any]) -> None:
         """
-        Report task completion.
+        报告任务完成。
         
-        Args:
-            task_id: The task identifier
-            result: Execution result
+        参数:
+            task_id: 任务标识符
+            result: 执行结果
         """
         pass
     
@@ -324,37 +323,37 @@ class IProgressReporter(ABC):
     async def report_error(self, task_id: str, error: str, 
                            details: Optional[Dict[str, Any]] = None) -> None:
         """
-        Report task error.
+        报告任务错误。
         
-        Args:
-            task_id: The task identifier
-            error: Error message
-            details: Optional error details
+        参数:
+            task_id: 任务标识符
+            error: 错误消息
+            details: 可选的错误详情
         """
         pass
 
 
 class IStorageBackend(ABC):
     """
-    Abstract interface for storage backend.
+    存储后端抽象接口。
     
-    Provides methods for persisting and retrieving webapp and task data.
-    Can be implemented with filesystem, database, or cloud storage.
+    提供持久化和检索WebApp及任务数据的方法。
+    可以用文件系统、数据库或云存储实现。
     """
     
     @abstractmethod
     async def save_webapp(self, webapp_id: str, data: Dict[str, Any], 
                           user_id: str = "default") -> bool:
         """
-        Save webapp data.
+        保存WebApp数据。
         
-        Args:
-            webapp_id: The webapp identifier
-            data: Webapp data dict
-            user_id: The user identifier
+        参数:
+            webapp_id: WebApp标识符
+            data: WebApp数据字典
+            user_id: 用户标识符
             
-        Returns:
-            True if save successful
+        返回:
+            保存成功返回True
         """
         pass
     
@@ -362,14 +361,14 @@ class IStorageBackend(ABC):
     async def load_webapp(self, webapp_id: str, 
                           user_id: str = "default") -> Optional[Dict[str, Any]]:
         """
-        Load webapp data.
+        加载WebApp数据。
         
-        Args:
-            webapp_id: The webapp identifier
-            user_id: The user identifier
+        参数:
+            webapp_id: WebApp标识符
+            user_id: 用户标识符
             
-        Returns:
-            Webapp data dict or None if not found
+        返回:
+            WebApp数据字典，如果未找到则返回None
         """
         pass
     
@@ -377,14 +376,14 @@ class IStorageBackend(ABC):
     async def delete_webapp(self, webapp_id: str, 
                             user_id: str = "default") -> bool:
         """
-        Delete webapp data.
+        删除WebApp数据。
         
-        Args:
-            webapp_id: The webapp identifier
-            user_id: The user identifier
+        参数:
+            webapp_id: WebApp标识符
+            user_id: 用户标识符
             
-        Returns:
-            True if deletion successful
+        返回:
+            删除成功返回True
         """
         pass
     
@@ -392,14 +391,14 @@ class IStorageBackend(ABC):
     async def list_webapps(self, user_id: str = "default", 
                            status: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        List all webapps for a user.
+        列出用户的所有WebApp。
         
-        Args:
-            user_id: The user identifier
-            status: Optional status filter
+        参数:
+            user_id: 用户标识符
+            status: 可选的状态过滤
             
-        Returns:
-            List of webapp data dicts
+        返回:
+            WebApp数据字典列表
         """
         pass
     
@@ -407,15 +406,15 @@ class IStorageBackend(ABC):
     async def save_task(self, task_id: str, data: Dict[str, Any], 
                         user_id: str = "default") -> bool:
         """
-        Save task data.
+        保存任务数据。
         
-        Args:
-            task_id: The task identifier
-            data: Task data dict
-            user_id: The user identifier
+        参数:
+            task_id: 任务标识符
+            data: 任务数据字典
+            user_id: 用户标识符
             
-        Returns:
-            True if save successful
+        返回:
+            保存成功返回True
         """
         pass
     
@@ -423,14 +422,14 @@ class IStorageBackend(ABC):
     async def load_task(self, task_id: str, 
                         user_id: str = "default") -> Optional[Dict[str, Any]]:
         """
-        Load task data.
+        加载任务数据。
         
-        Args:
-            task_id: The task identifier
-            user_id: The user identifier
+        参数:
+            task_id: 任务标识符
+            user_id: 用户标识符
             
-        Returns:
-            Task data dict or None if not found
+        返回:
+            任务数据字典，如果未找到则返回None
         """
         pass
     
@@ -439,15 +438,15 @@ class IStorageBackend(ABC):
                          status: Optional[str] = None,
                          limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
         """
-        List tasks for a user.
+        列出用户的任务。
         
-        Args:
-            user_id: The user identifier
-            status: Optional status filter
-            limit: Maximum number of results
-            offset: Result offset for pagination
+        参数:
+            user_id: 用户标识符
+            status: 可选的状态过滤
+            limit: 最大结果数量
+            offset: 分页偏移量
             
-        Returns:
-            List of task data dicts
+        返回:
+            任务数据字典列表
         """
         pass

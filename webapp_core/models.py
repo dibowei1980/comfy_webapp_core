@@ -1,7 +1,7 @@
 """
-Data models for ComfyUI WebApp Core.
+ComfyUI WebApp 核心数据模型。
 
-These models are shared between master and worker components.
+这些模型在主从组件之间共享。
 """
 
 from dataclasses import dataclass, field
@@ -16,12 +16,12 @@ BEIJING_TZ = timezone(timedelta(hours=8))
 
 
 def beijing_now() -> datetime:
-    """Get current time in Beijing timezone (without timezone info)."""
+    """获取北京时间（不含时区信息）。"""
     return datetime.now(BEIJING_TZ).replace(tzinfo=None)
 
 
 class FieldType(Enum):
-    """Field type enumeration for node inputs."""
+    """节点输入的字段类型枚举。"""
     STRING = "STRING"
     IMAGE = "IMAGE"
     AUDIO = "AUDIO"
@@ -33,7 +33,7 @@ class FieldType(Enum):
 
 
 class WebAppStatus(Enum):
-    """WebApp status enumeration."""
+    """WebApp状态枚举。"""
     DRAFT = "draft"
     PUBLISHED = "published"
     ARCHIVED = "archived"
@@ -42,21 +42,21 @@ class WebAppStatus(Enum):
 @dataclass
 class NodeField:
     """
-    Represents an editable field in a workflow node.
+    表示工作流节点中的可编辑字段。
     
-    Attributes:
-        nodeId: The ID of the node in the workflow
-        nodeName: The class type name of the node
-        fieldName: The name of the input field
-        fieldValue: The current value of the field
-        fieldType: The type of the field (STRING, IMAGE, etc.)
-        displayName: Human-readable display name
-        description: Field description/tooltip
-        fieldData: Additional data (e.g., options for LIST type)
-        required: Whether the field is required
-        editable: Whether the field can be edited
-        fileContent: Base64 encoded file content (for file uploads)
-        originalFilename: Original filename for uploaded files
+    属性:
+        nodeId: 工作流中节点的ID
+        nodeName: 节点的类类型名称
+        fieldName: 输入字段的名称
+        fieldValue: 字段的当前值
+        fieldType: 字段类型（STRING、IMAGE等）
+        displayName: 人类可读的显示名称
+        description: 字段描述/提示
+        fieldData: 附加数据（如LIST类型的选项）
+        required: 字段是否必填
+        editable: 字段是否可编辑
+        fileContent: Base64编码的文件内容（用于文件上传）
+        originalFilename: 上传文件的原始文件名
     """
     nodeId: str
     nodeName: str
@@ -72,7 +72,7 @@ class NodeField:
     originalFilename: Optional[str] = None
 
     def to_dict(self) -> dict:
-        """Convert to dictionary for JSON serialization."""
+        """转换为字典以便JSON序列化。"""
         result = {
             "nodeId": self.nodeId,
             "nodeName": self.nodeName,
@@ -94,7 +94,7 @@ class NodeField:
 
     @classmethod
     def from_dict(cls, data: dict) -> "NodeField":
-        """Create from dictionary."""
+        """从字典创建实例。"""
         return cls(
             nodeId=data.get("nodeId", ""),
             nodeName=data.get("nodeName", ""),
@@ -114,20 +114,20 @@ class NodeField:
 @dataclass
 class WebApp:
     """
-    Represents a WebApp - a simplified interface for a ComfyUI workflow.
+    表示一个WebApp - ComfyUI工作流的简化接口。
     
-    Attributes:
-        id: Unique identifier
-        name: Display name
-        description: Description text
-        workflow: The original workflow JSON
-        nodeInfoList: List of editable fields extracted from the workflow
-        status: Current status (draft, published, archived)
-        cover_image: URL to cover image
-        tags: List of tags for categorization
-        created_at: Creation timestamp
-        updated_at: Last update timestamp
-        run_mode: GPU memory mode (8g, 16g, 24g, 32g, 48g)
+    属性:
+        id: 唯一标识符
+        name: 显示名称
+        description: 描述文本
+        workflow: 原始工作流JSON
+        nodeInfoList: 从工作流中提取的可编辑字段列表
+        status: 当前状态（draft、published、archived）
+        cover_image: 封面图片URL
+        tags: 分类标签列表
+        created_at: 创建时间戳
+        updated_at: 最后更新时间戳
+        run_mode: GPU内存模式（8g、16g、24g、32g、48g）
     """
     id: str
     name: str
@@ -142,7 +142,7 @@ class WebApp:
     run_mode: str = "8g"
 
     def to_dict(self) -> dict:
-        """Convert to dictionary for JSON serialization."""
+        """转换为字典以便JSON序列化。"""
         return {
             "id": self.id,
             "name": self.name,
@@ -159,7 +159,7 @@ class WebApp:
 
     @classmethod
     def from_dict(cls, data: dict) -> "WebApp":
-        """Create from dictionary."""
+        """从字典创建实例。"""
         node_info_list = [NodeField.from_dict(f) for f in data.get("nodeInfoList", [])]
         return cls(
             id=data.get("id", str(uuid.uuid4())),
@@ -179,26 +179,26 @@ class WebApp:
 @dataclass
 class TaskResult:
     """
-    Represents the result of a WebApp execution task.
+    表示WebApp执行任务的结果。
     
-    Attributes:
-        taskId: Unique task identifier
-        status: Current status (pending, running, completed, failed, cancelled)
-        webappId: ID of the WebApp being executed
-        webappName: Name of the WebApp
-        nodeInfoList: Parameters used for this execution
-        outputs: Raw output data
-        outputFiles: List of output files with URLs
-        tempFiles: List of temporary files used
-        error: Error message if failed
-        failedReason: Detailed failure reason
-        progress: Execution progress (0.0 to 1.0)
-        current_node: Currently executing node name
-        created_at: Task creation timestamp
-        started_at: Execution start timestamp
-        completed_at: Execution completion timestamp
-        parentTaskId: Parent task ID for retries
-        retryCount: Number of retry attempts
+    属性:
+        taskId: 唯一任务标识符
+        status: 当前状态（pending、running、completed、failed、cancelled）
+        webappId: 正在执行的WebApp ID
+        webappName: WebApp名称
+        nodeInfoList: 本次执行使用的参数
+        outputs: 原始输出数据
+        outputFiles: 包含URL的输出文件列表
+        tempFiles: 使用的临时文件列表
+        error: 失败时的错误信息
+        failedReason: 详细的失败原因
+        progress: 执行进度（0.0到1.0）
+        current_node: 当前正在执行的节点名称
+        created_at: 任务创建时间戳
+        started_at: 执行开始时间戳
+        completed_at: 执行完成时间戳
+        parentTaskId: 重试时的父任务ID
+        retryCount: 重试次数
     """
     taskId: str
     status: str
@@ -219,7 +219,7 @@ class TaskResult:
     retryCount: int = 0
 
     def to_dict(self) -> dict:
-        """Convert to dictionary for JSON serialization."""
+        """转换为字典以便JSON序列化。"""
         return {
             "taskId": self.taskId,
             "status": self.status,
@@ -242,7 +242,7 @@ class TaskResult:
     
     @classmethod
     def from_dict(cls, data: dict) -> "TaskResult":
-        """Create from dictionary."""
+        """从字典创建实例。"""
         node_info_list = [NodeField.from_dict(n) for n in data.get("nodeInfoList", [])]
         return cls(
             taskId=data.get("taskId", ""),

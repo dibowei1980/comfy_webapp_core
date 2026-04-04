@@ -1,36 +1,35 @@
 """
-ComfyUI WebApp Core Library
+ComfyUI WebApp 核心库
 
-A shared library for ComfyUI WebApp functionality, designed for
-distributed master-worker deployment scenarios.
+用于ComfyUI WebApp功能的共享库，专为分布式主从部署场景设计。
 
-Features:
-- Data models for WebApp, NodeField, TaskResult
-- Node mapper for workflow conversion
-- User directory management for multi-user isolation
-- Abstract interfaces for dependency injection
+功能:
+- WebApp、NodeField、TaskResult 数据模型
+- 工作流转换的节点映射器
+- 多用户隔离的用户目录管理
+- 依赖注入的抽象接口
 
-Usage:
+用法:
     from webapp_core import (
         WebApp, NodeField, TaskResult,
         NodeMapper, node_mapper,
-        BaseUserDirectoryManager, user_dir_manager,
+        UserDirectoryManager, user_dir_manager,
         INodeRegistry, IPathManager, ITaskQueue, IExecutionEngine
     )
     
-    # Create a WebApp from workflow
+    # 从工作流创建WebApp
     webapp = node_mapper.create_webapp_from_workflow(workflow, "My App")
     
-    # Use user-specific directories
+    # 使用用户专属目录
     with user_dir_manager.user_context("user123"):
-        # Operations use user123's directories
+        # 操作使用user123的目录
         pass
 
-Installation:
+安装:
     pip install comfyui-webapp-core
     
-Or from git:
-    pip install comfyui-webapp-core @ git+https://github.com/dibowei1980/comfy-webapp-core.git
+或从git安装:
+    pip install comfyui-webapp-core @ git+https://github.com/dibowei1980/comfyui-webapp-core.git
 """
 
 __version__ = "0.1.0"
@@ -61,17 +60,17 @@ from .node_mapper import (
 )
 
 from .user_directory import (
-    BaseUserDirectoryManager,
+    UserDirectoryManager,
     user_dir_manager,
 )
 
 __all__ = [
-    # Version info
+    # 版本信息
     "__version__",
     "__author__",
     "__license__",
     
-    # Models
+    # 模型
     "FieldType",
     "WebAppStatus",
     "NodeField",
@@ -79,7 +78,7 @@ __all__ = [
     "TaskResult",
     "beijing_now",
     
-    # Interfaces
+    # 接口
     "INodeRegistry",
     "IPathManager",
     "ITaskQueue",
@@ -87,11 +86,11 @@ __all__ = [
     "IProgressReporter",
     "IStorageBackend",
     
-    # Node Mapper
+    # 节点映射器
     "NodeMapper",
     "node_mapper",
     
-    # User Directory
-    "BaseUserDirectoryManager",
+    # 用户目录
+    "UserDirectoryManager",
     "user_dir_manager",
 ]

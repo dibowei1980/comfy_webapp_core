@@ -1,10 +1,10 @@
 """
-Node mapper for converting between workflow and API formats.
+节点映射器，用于工作流和API格式之间的转换。
 
-This module provides functionality to:
-1. Extract editable fields from a workflow
-2. Convert workflow to API format for execution
-3. Apply field changes back to workflow
+本模块提供以下功能：
+1. 从工作流中提取可编辑字段
+2. 将工作流转换为API执行格式
+3. 将字段变更应用回工作流
 """
 
 import json
@@ -17,12 +17,12 @@ from .interfaces import INodeRegistry
 
 class NodeMapper:
     """
-    Maps between workflow JSON and WebApp data structures.
+    工作流JSON和WebApp数据结构之间的映射器。
     
-    This class handles:
-    - Extracting editable fields from workflow nodes
-    - Converting workflow to API execution format
-    - Applying parameter changes to workflow
+    处理：
+    - 从工作流节点提取可编辑字段
+    - 将工作流转换为API执行格式
+    - 将参数变更应用到工作流
     """
     
     FIELD_TYPE_MAP = {
@@ -58,11 +58,11 @@ class NodeMapper:
 
     def __init__(self, node_registry: Optional[INodeRegistry] = None):
         """
-        Initialize the NodeMapper.
+        初始化NodeMapper。
         
-        Args:
-            node_registry: Optional node registry for getting node info.
-                          If None, will try to use ComfyUI's default registry.
+        参数:
+            node_registry: 可选的节点注册表，用于获取节点信息。
+                          如果为None，将尝试使用ComfyUI的默认注册表。
         """
         self._node_registry = node_registry
         self._node_class_mappings = None
@@ -70,7 +70,7 @@ class NodeMapper:
 
     @property
     def node_class_mappings(self) -> Dict[str, type]:
-        """Get node class mappings from registry or ComfyUI."""
+        """从注册表或ComfyUI获取节点类映射。"""
         if self._node_class_mappings is None:
             if self._node_registry:
                 self._node_class_mappings = self._node_registry.get_node_class_mappings()
@@ -79,13 +79,13 @@ class NodeMapper:
                     import nodes
                     self._node_class_mappings = nodes.NODE_CLASS_MAPPINGS
                 except ImportError:
-                    logging.warning("ComfyUI nodes module not available")
+                    logging.warning("ComfyUI nodes模块不可用")
                     self._node_class_mappings = {}
         return self._node_class_mappings
 
     @property
     def node_display_names(self) -> Dict[str, str]:
-        """Get node display names from registry or ComfyUI."""
+        """从注册表或ComfyUI获取节点显示名称。"""
         if self._node_display_names is None:
             if self._node_registry:
                 self._node_display_names = self._node_registry.get_node_display_names()
@@ -94,19 +94,19 @@ class NodeMapper:
                     import nodes
                     self._node_display_names = nodes.NODE_DISPLAY_NAME_MAPPINGS
                 except ImportError:
-                    logging.warning("ComfyUI nodes module not available")
+                    logging.warning("ComfyUI nodes模块不可用")
                     self._node_display_names = {}
         return self._node_display_names
 
     def get_node_info(self, node_class_name: str) -> Optional[Dict[str, Any]]:
         """
-        Get detailed information about a node class.
+        获取节点类的详细信息。
         
-        Args:
-            node_class_name: The node class type name
+        参数:
+            node_class_name: 节点类类型名称
             
-        Returns:
-            Dict with node info or None if not found
+        返回:
+            包含节点信息的字典，如果未找到则返回None
         """
         if self._node_registry:
             return self._node_registry.get_node_info(node_class_name)
@@ -130,7 +130,7 @@ class NodeMapper:
                 input_types = node_class.INPUT_TYPES()
                 info["input_types"] = input_types
             except Exception as e:
-                logging.warning(f"Error getting input types for {node_class_name}: {e}")
+                logging.warning(f"获取 {node_class_name} 输入类型时出错: {e}")
 
         if hasattr(node_class, "RETURN_TYPES"):
             info["output_types"] = list(node_class.RETURN_TYPES) if node_class.RETURN_TYPES else []
@@ -145,13 +145,13 @@ class NodeMapper:
 
     def map_field_type(self, comfy_type: str) -> str:
         """
-        Map ComfyUI field type to WebApp field type.
+        将ComfyUI字段类型映射到WebApp字段类型。
         
-        Args:
-            comfy_type: The ComfyUI field type string
+        参数:
+            comfy_type: ComfyUI字段类型字符串
             
-        Returns:
-            WebApp field type string
+        返回:
+            WebApp字段类型字符串
         """
         base_type = comfy_type.split(",")[0].strip()
         if base_type in self.FIELD_TYPE_MAP:
@@ -169,13 +169,13 @@ class NodeMapper:
 
     def extract_editable_fields(self, workflow: Dict[str, Any]) -> List[NodeField]:
         """
-        Extract editable fields from a workflow.
+        从工作流中提取可编辑字段。
         
-        Args:
-            workflow: The workflow JSON dict
+        参数:
+            workflow: 工作流JSON字典
             
-        Returns:
-            List of NodeField objects for editable fields
+        返回:
+            可编辑字段的NodeField对象列表
         """
         fields = []
         
@@ -243,7 +243,7 @@ class NodeMapper:
         return fields
 
     def _get_current_value(self, node: Dict, field_name: str, field_config: Any) -> Any:
-        """Get the current value for a field from node widgets_values."""
+        """从节点widgets_values获取字段的当前值。"""
         widgets_values = node.get("widgets_values", [])
         
         if isinstance(field_config, (list, tuple)) and len(field_config) > 1:
@@ -264,7 +264,7 @@ class NodeMapper:
         return ""
 
     def _get_description(self, field_name: str, field_config: Any) -> str:
-        """Get description for a field."""
+        """获取字段的描述。"""
         if isinstance(field_config, (list, tuple)) and len(field_config) > 1:
             config_dict = field_config[1] if isinstance(field_config[1], dict) else {}
             if "tooltip" in config_dict:
@@ -274,13 +274,13 @@ class NodeMapper:
 
     def workflow_to_api_format(self, workflow: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Convert workflow JSON to API execution format.
+        将工作流JSON转换为API执行格式。
         
-        Args:
-            workflow: The workflow JSON dict
+        参数:
+            workflow: 工作流JSON字典
             
-        Returns:
-            Dict in API format ready for execution
+        返回:
+            API格式的字典，可直接用于执行
         """
         api_format = {}
         
@@ -375,14 +375,14 @@ class NodeMapper:
 
     def apply_field_changes(self, workflow: Dict[str, Any], node_info_list: List[NodeField]) -> Dict[str, Any]:
         """
-        Apply field changes to a workflow.
+        将字段变更应用到工作流。
         
-        Args:
-            workflow: The workflow JSON dict
-            node_info_list: List of NodeField with updated values
+        参数:
+            workflow: 工作流JSON字典
+            node_info_list: 包含更新值的NodeField列表
             
-        Returns:
-            Updated workflow dict
+        返回:
+            更新后的工作流字典
         """
         if not workflow or "nodes" not in workflow:
             return workflow
@@ -456,15 +456,15 @@ class NodeMapper:
     def create_webapp_from_workflow(self, workflow: Dict[str, Any], name: str, 
                                      description: str = "") -> WebApp:
         """
-        Create a WebApp from a workflow.
+        从工作流创建WebApp。
         
-        Args:
-            workflow: The workflow JSON dict
-            name: WebApp name
-            description: WebApp description
+        参数:
+            workflow: 工作流JSON字典
+            name: WebApp名称
+            description: WebApp描述
             
-        Returns:
-            WebApp instance
+        返回:
+            WebApp实例
         """
         import uuid
         
